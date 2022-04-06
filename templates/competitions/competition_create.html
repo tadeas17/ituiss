@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block titleblock %}
+    <title>Modeláři - Soutěž</title>
+{% endblock %}
+
+{% block content %}
+    {% if not user.is_authenticated %}
+{#        TODO: přidat redirect pro login#}
+    {% else %}
+        <link rel="stylesheet"
+              href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css"
+              integrity="sha256-DOS9W6NR+NFe1fUhEE0PGKY/fubbUCnOfTje2JMDw3Y=" crossorigin="anonymous"/>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js"
+                integrity="sha256-FEqEelWI3WouFOo2VWP/uJfs1y8KJ++FLh2Lbqc8SJk=" crossorigin="anonymous"></script>
+        <div class="container-fluid justify-content-center">
+            {% if registration_error %}
+                <div class="alert alert-warning center-block alert-dismissible fade show" style="margin-top: 2vh;"
+                     role="alert">
+                    Soutěž se nepodařilo vytvořit.
+                </div>
+            {% endif %}
+            <div class="row h-100 justify-content-center align-items-center" style="margin-top: 5vh;">
+                <div class="col col-lg-3">
+                    <form class="form-horizontal" method="post" enctype="multipart/form-data">{% csrf_token %}
+                        <fieldset>
+                            <legend>{{ title }}</legend>
+                            {% for field in form.visible_fields %}
+                                {% if field.errors %}
+                                    <div class="control-group error">
+                                        <label class="control-label">{{ field.label }}{% if field.field.required %} * {% endif %}</label>
+                                        <div class="controls">{{ field }}
+                                            <span class="help-inline">
+                                        <div class="alert alert-warning center-block alert-dismissible fade show"
+                                             style="margin-top: 2vh;" role="alert">
+                                            {% for error in  field.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    </span>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="control-group">
+                                        <label class="control-label">{{ field.label }}{% if field.field.required %} * {% endif %}</label>
+                                        <div class="controls">{{ field }}
+                                            {% if field.help_text %}
+                                                <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary btn-lg btn-block" style="margin-top: 2vh;">
+                                    Vytvořit soutěž
+                                </button>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <script>
+            jQuery.datetimepicker.setLocale('cs');
+            $(function () {
+                $("#id_date_organisation").datetimepicker();});
+
+            $(function () {
+                $("#id_date_registration").datetimepicker();});
+        </script>
+    {% endif %}
+{% endblock %}

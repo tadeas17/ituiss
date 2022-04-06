@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="row justify-content-center" style="padding-top: 5em;">
+        <div class="col-sm-8">
+        <h3>Soupiska soutěžících</h3>
+    {% for person, miniatures in persons_and_miniatures %}
+        <div class="table-responsive" id="table{{person.id}}">
+        <table class="table" style="margin: 0px">
+            <thead class="thead-dark">
+            <tr>
+
+                <th>{{ person.first_name }} {{ person.last_name }},
+                    {% if person.phone %}
+                        tel.: {{ person.phone }},
+                    {% else %}
+                        {% if person.owner.phone %}
+                        tel.: {{ person.owner.phone }} (uživ.),
+                        {% endif %}
+                    {% endif %}
+                    {% if person.email %}
+                        email: {{ person.email }},
+                    {% else %}
+                        {% if person.owner.email %}
+                            email: {{ person.owner.email }} (uživ.),
+                        {% endif %}
+                    {% endif %}
+                    {{person.town}}
+                </th>
+                <th>
+                    <button type="button" class="btn-close" aria-label="Close"
+                            onclick="removePerson({{ person.id }})"></button>
+                </th>
+            </tr>
+            </thead>
+        </table>
+
+        <table class="table" style="margin-bottom: 25px">
+            <tbody>
+            {% for miniature, additional_information, category, registration_time in miniatures %}
+                <tr id="row{{miniature.id}}">
+                    <td>{{ miniature.name }}</td>
+                    <td>{{ miniature.miniature_type.name }}</td>
+                    <td>{{ miniature.scale }}</td>
+                    <td>{{ miniature.manufacturer }}</td>
+                    <td>{{ additional_information }}</td>
+                    <td>{{ category }}</td>
+                    <td>{{ registration_time }}</td>
+                    <td>
+                        <button type="button" class="btn-close" aria-label="Close"
+                                onclick="removeMiniature({{ miniature.id }})"></button>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% endfor %}
+    </div>
+    </div>
+
+    <script>
+        function removeMiniature(miniature_id) {
+            var data = {
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            request: 'unregister_miniature',
+            miniature_id: miniature_id
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "{{request.path}}",
+            data: data,
+            dataType: "json",
+            encode: true,
+            success: function(data) {
+                if (data['status'] == 'success')
+                {
+                    $("#row"+data['miniature_id']).remove();
+                }
+                else if (data['status'] == 'all_miniatures')
+                {
+                    $("#row"+data['miniature_id']).remove();
+                    $("#table"+data['person_id']).remove();
+                }
+                else if (data['status'] == 'not_existing')
+                {
+                    console.log('Miniature is not registered.');
+                }
+            },
+            error: function(error) {
+                console.log(error)
+                console.log('Something went wrong');
+            }
+        }).done(function (data) {
+            console.log("fill form done");
+        });
+        }
+
+        function removePerson(person_id) {
+            var data = {
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            request: 'unregister_person',
+            person_id: person_id
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "{{request.path}}",
+            data: data,
+            dataType: "json",
+            encode: true,
+            success: function(data) {
+                if (data['status'] == 'success')
+                {
+                    $("#table"+data['person_id']).remove();
+                }
+                else if (data['status'] == 'not_existing')
+                {
+                    console.log('Person is not registered.');
+                }
+            },
+            error: function(error) {
+                console.log(error)
+                console.log('Something went wrong');
+            }
+        }).done(function (data) {
+            console.log("fill form done");
+        });
+        }
+    </script>
+{% endblock %}

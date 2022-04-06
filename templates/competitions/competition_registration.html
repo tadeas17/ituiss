@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+
+{% block titleblock %}
+    <title>Modeláři - Registrace modelů</title>
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center" style="padding-top: 5em;">
+
+    <div class="col-sm-1"></div>
+    <div class="col-sm-4" id="form-col">
+                  <form onsubmit="return post_form(event)" class="form-horizontal" method="post" id="registration-form">{% csrf_token %}
+                        <fieldset>
+                            <legend>{{ title }}</legend>
+                            {% for field in form %}
+                                {% if field.errors %}
+                                    <div class="control-group error">
+                                        <label class="control-label">{{ field.label }}{% if field.field.required %} * {% endif %}</label>
+                                        <div class="controls">{{ field }}
+                                            <span class="help-inline">
+                                        <div class="alert alert-warning center-block alert-dismissible fade show"
+                                             style="margin-top: 2vh;" role="alert">
+                                            {% for error in  field.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    </span>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="control-group">
+                                        {% if field in form.visible_fields %}
+                                        <label class="control-label">{{ field.label }}{% if field.field.required %} * {% endif %}</label>
+                                        {% endif %}
+                                        <div class="controls">{{ field }}
+                                            {% if field.help_text %}
+                                                <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                                <div class="form-actions">
+                                    <button id="form-button" type="submit" disabled class="btn btn-primary btn-lg btn-block" style="margin-top: 2vh;">
+                                        Registrovat model
+                                    </button>
+                                </div>
+                        </fieldset>
+                    </form>
+    </div>
+    <div class="col-sm-6">
+        <div class="table-responsive">
+        <table class="table">
+        {% for person, miniatures in persons %}
+            <thead>
+              <tr>
+                <th scope="col">{{person.first_name}}</th>
+                <th scope="col">{{person.last_name}}</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for miniature, registered in miniatures %}
+              <tr id="{{miniature.id}}" onclick="pick_miniature({{miniature.id}})">
+                <td>{{miniature.name}}</td>
+                <td>{{miniature.miniature_type.name}}</td>
+                <td>{{miniature.scale}}</td>
+                <td>{{miniature.manufacturer}}</td>
+                <td>
+                    {% if registered %}
+                    <div class="collapse show" id="collapse{{miniature.id}}">
+                    {% else %}
+                    <div class="collapse" id="collapse{{miniature.id}}">
+                    {% endif %}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16" style="padding-top: 0.3em;">
+                        <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/>
+                     </svg>
+                    <button type="button" class="btn-close" aria-label="Close" onclick="unregister_miniature({{miniature.id}})"></button>
+                    </div>
+                </td>
+              </tr>
+            {% endfor %}
+        {% endfor %}
+    </table>
+</div>
+    </div>
+    <div class="col-sm-1"></div>
+</div>
+
+<script type="application/javascript">
+
+    var picked_miniature = 0;
+    if (picked_miniature == 0)
+    {
+        $("#form-button").attr('disabled', '');
+    }
+    else
+        $("#"+picked_miniature).attr('style', 'background-color: gray;');
+
+    function post_form(event)
+    {
+        event.preventDefault();
+
+        var formData = new FormData(document.getElementById('registration-form'));
+        formData['request'] = 'register_miniature'; 
+
+        $.ajax({
+                type: "POST",
+                url: "{{request.path}}",
+                data: formData,
+                dataType: "json",
+                processData: false,
+                contentType: false,
+                encode: true,
+                success: function(data) {
+                    if (data['status'] == 'success')
+                    {
+                        $("#form-button").text("Upravit registraci");
+                        $("#collapse"+data['miniature_id']).collapse('show');
+                    }
+                    else if (data['status'] == 'invalid_form')
+                    {
+                        $("#form-col").html(data['form']);
+                    }
+                    else if (data['status'] == 'reg_deadline')
+                    {
+                        alert("Po ukončení registrací již nelze provádět další změny");
+                    }
+                },
+                error: function(error) {
+                    console.log(error)
+                    console.log('Something went wrong');
+                }
+            }).done(function (data) {
+                console.log("delete done");
+            });
+
+            return false;
+    }
+
+    function unregister_miniature(miniature_id)
+    {
+        var formData = {
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            request: 'unregister',
+            miniature_id: miniature_id
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "{{request.path}}",
+            data: formData,
+            dataType: "json",
+            encode: true,
+            success: function(data) {
+                if (data['status'] == 'success')
+                {
+                    $("#form-button").text("Registrovat model");
+                    $("#collapse"+data['miniature_id']).collapse('hide');
+                }
+                else if (data['status'] == 'not_existing')
+                {
+                    console.log('Miniature is not registered.');
+                }
+                else if (data['status'] == 'reg_deadline')
+                {
+                    alert("Po ukončení registrací již nelze provádět další změny");
+                }
+            },
+            error: function(error) {
+                console.log(error)
+                console.log('Something went wrong');
+            }
+        }).done(function (data) {
+            console.log("fill form done");
+        });
+    }
+
+    function fill_form(miniature_id)
+    {
+        var formData = {
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            request: 'fill_form',
+            miniature_id: miniature_id
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "{{request.path}}",
+            data: formData,
+            dataType: "json",
+            encode: true,
+            success: function(data) {
+                if (data['status'] == 'uncreated')
+                {
+                    $("#id_category").val('');
+                    $('#id_additional_information').val('');
+                    $("#form-button").text("Registrovat model");
+                }
+                else if (data['status'] == 'existing')
+                {
+                    $("#form-button").text("Upravit registraci");
+                    $("#id_category").val(data['category']);
+                    $('#id_additional_information').val(data['additional_information']);
+                }
+            },
+            error: function(error) {
+                console.log(error)
+                console.log('Something went wrong');
+            }
+        }).done(function (data) {
+            console.log("fill form done");
+        });
+    }
+
+    function pick_miniature(miniature_id)
+    {
+        if (picked_miniature)
+            $("#"+picked_miniature).removeAttr('style');
+
+        $("#"+miniature_id).attr('style', 'background-color: gray;');
+        picked_miniature = miniature_id;
+        $("#form-button").removeAttr('disabled');
+
+        $("#id_miniature").val(miniature_id);
+        $("#id_competition").val("{{competition_id}}");
+
+        fill_form(miniature_id);
+    }
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends 'base.html' %} 
+
+{% block titleblock %}
+<title>Modeláři</title>
+{%endblock%}
+
+{% block content %}
+
+
+<div class="container-md vh-75 align-items-center">
+    {% if registration_error %}
+    <div class="alert alert-warning center-block alert-dismissible fade show" style="margin-top: 2vh;" role="alert">
+        Přihlášení uživatelé nemohou provádět registrace.
+    </div>
+    {%endif%}
+    {% if registration_success %}
+    <div class="alert alert-success center-block alert-dismissible fade show" style="margin-top: 2vh;" role="alert">
+        Registrace proběhla úspěšně, vítejte {{ user.get_username }}.
+    </div>
+    {%endif%}
+    {% if login_success %}
+    <div class="alert alert-success center-block alert-dismissible fade show" style="margin-top: 2vh;" role="alert">
+        Přihlášení proběhlo úspěšně, vítejte {{ user.get_username }}.
+    </div>
+    {%endif%}
+    {% if logout_success %}
+    <div class="alert alert-success center-block alert-dismissible fade show" style="margin-top: 2vh;" role="alert">
+        Odhlášení proběhlo úspěšně.
+    </div>
+    {%endif%}
+    {% if delete_account %}
+    <div class="alert alert-success center-block alert-dismissible fade show" style="margin-top: 2vh;" role="alert">
+        {{ delete_account }}
+    </div>
+    {% endif %}
+    
+    <div class="d-grid gap-2 col-lg-6 mx-auto align-items-center" style="margin-top: 8em;">
+        <div class="row gap-5">
+            <span class="d-inline-block">
+                <a href="/competitions" class="btn btn-primary btn-lg btn-block" type="button" style="background-color: gray;font: 1.5em sans-serif; width: 100%;" >Soutěže</a>
+            </span>
+            {% if user.is_authenticated %}
+            <span class="d-inline-block">
+                <a href="/persons" class="btn btn-primary btn-lg btn-block" type="button" style="background-color: gray; font: 1.5em sans-serif;width: 100%;">Soutěžící</a>
+            </span>
+            {% if user.is_superuser %}
+            <span class="d-inline-block">
+                <a href="/users" class="btn btn-primary btn-lg btn-block" type="button" style="background-color: gray; font: 1.5em sans-serif;width: 100%;">Uživatelé</a>
+            </span>
+            <span class="d-inline-block">
+                <a href="/categories" class="btn btn-primary btn-lg btn-block" type="button" style="background-color: gray; font: 1.5em sans-serif;width: 100%;">Kategorie</a>
+            </span>
+            {% endif %}
+            {% else %}
+            <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="Pouze přihlášení uživatelé mohou spravovat účastníky soutěží a jejich modely.">
+                <button class="btn btn-primary btn-block btn-lg" type="button" disabled style="background-color: gray; font: 1.5em sans-serif; width:100%;">Soutěžící</button>
+            </span>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}

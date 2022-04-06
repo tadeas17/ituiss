@@ -1,0 +1,36 @@
+<form onsubmit="return post_form(event)" class="form-horizontal" method="post" id="registration-form">{% csrf_token %}
+    <fieldset>
+        <legend>{{ title }}</legend>
+        {% for field in form %}
+            {% if field.errors %}
+                <div class="control-group error">
+                    <label class="control-label">{{ field.label }}{% if field.field.required %} * {% endif %}</label>
+                    <div class="controls">{{ field }}
+                        <span class="help-inline">
+                    <div class="alert alert-warning center-block alert-dismissible fade show"
+                         style="margin-top: 2vh;" role="alert">
+                        {% for error in  field.errors %}{{ error }}{% endfor %}
+                    </div>
+                </span>
+                    </div>
+                </div>
+            {% else %}
+                <div class="control-group">
+                    {% if field in form.visible_fields %}
+                    <label class="control-label">{{ field.label }}{% if field.field.required %} * {% endif %}</label>
+                    {% endif %}
+                    <div class="controls">{{ field }}
+                        {% if field.help_text %}
+                            <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+            <div class="form-actions">
+                <button id="form-button" type="submit" disabled class="btn btn-primary btn-lg btn-block" style="margin-top: 2vh;">
+                    Registrovat model
+                </button>
+            </div>
+    </fieldset>
+</form>

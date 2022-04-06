@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+
+{% block titleblock %}
+<title>Modeláři - Modely</title>
+{% endblock %}
+
+{% block content %}
+<script type="application/javascript">
+
+    function delete_miniature(miniature_id)
+    {
+        var formData = {
+            request:"delete_miniature",
+            miniature_id:miniature_id,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        };
+        $.ajax({
+            type: "POST",
+            url: "{{ request.path }}",
+            data: formData,
+            dataType: "json",
+            encode: true,
+
+            success: function(data) {
+                document.getElementById("accordionitem"+miniature_id).remove();
+            },
+            error: function(error) {
+                console.log(error)
+                console.log('Something went wrong');
+            }
+            }).done(function (data) {
+                console.log("delete done");
+            });
+    }
+
+    function edit_miniature(e, miniature_id)
+    {
+        e.preventDefault();
+        try {
+            obj = $("form"+miniature_id);
+            if (!document.getElementById("form"+miniature_id).reportValidity())
+            {
+                return;
+            }
+
+            var fromData;
+            if (parseInt(miniature_id) != -1)
+                formData = {
+                    csrfmiddlewaretoken: '{{csrf_token}}',
+                    name: $("#"+miniature_id+"_name").val(),
+                    miniature_type: $("#"+miniature_id+"_miniature_type").val(),
+                    scale: $("#"+miniature_id+"_scale").val(),
+                    manufacturer: $("#"+miniature_id+"_manufacturer").val(),
+                    request: "edit_miniature",
+                    form_miniature_id: $("#"+miniature_id+"_form_miniature_id").val(),
+                    form_person_id: $("#"+miniature_id+"_form_person_id").val()
+                    };
+            else
+                formData = {
+                    csrfmiddlewaretoken: '{{csrf_token}}',
+                    name: $("#id_name").val(),
+                    miniature_type: $("#id_miniature_type").val(),
+                    scale: $("#id_scale").val(),
+                    manufacturer: $("#id_manufacturer").val(),
+                    request: "add_miniature",
+                    form_miniature_id: $("#form_miniature_id").val(),
+                    form_person_id: $("#form_person_id").val()
+                    };
+
+            $.ajax({
+                miniature_id: miniature_id,
+                type: "POST",
+                url: "{{ request.path }}",
+                data: formData,
+                dataType: "html",
+                encode: true,
+                
+                success: function(data) {
+                    $("#accordionitem"+miniature_id).replaceWith(data);
+                    $("#form"+miniature_id).validate();
+            },
+            error: function(error) {
+                console.log(error)
+                console.log('Something went wrong');
+            }
+            }).done(function (data) {
+                console.log("edit done");
+            });
+
+
+        } catch (e) {
+            throw new Error(e.message);
+        }
+    
+        return false;
+    }
+
+    $(document).ready(function()
+    {
+        $("form").submit(function (event) {
+            event.preventDefault(); 
+            var formData = {
+            csrfmiddlewaretoken: '{{csrf_token}}',
+            name: $("#id_name").val(),
+            miniature_type: $("#id_miniature_type").val(),
+            scale: $("#id_scale").val(),
+            manufacturer: $("#id_manufacturer").val(),
+            request: "add_miniature",
+            form_miniature_id: $("#form_miniature_id").val(),
+            form_person_id: $("#form_person_id").val()
+            };
+            
+            console.log(form_miniature_id)
+            $.ajax({
+                form_miniature_id: form_miniature_id,
+                type: "POST",
+                url: "{{ request.path }}",
+                data: formData,
+                dataType: "html",
+                encode: true,
+                
+                success: function(data, form_miniature_id) {
+                    $("#accordionMiniatures").append(data);
+            },
+            error: function(error) {
+                console.log(error)
+                console.log('Something went wrong');
+            }
+            }).done(function (data) {
+                console.log(data)
+            });
+        });
+        return false;
+    });
+</script>
+
+<div class="row gap-1" style="margin-top: 3em; margin-left: 2em; margin-right: 2em;">
+    <div class="d-grid gap-2 col-sm-8 mx-auto align-items-center" style="z-index: 0;">
+        <div class="row">
+            <div class="col-sm-9">
+                <h3>Modely soutěžícího {{person.first_name}} {{person.last_name}}</h3>
+             </div>
+             <div class="col-sm-3">
+        <a href="{% url 'persons' %}" style="float: left; width: 100%;">
+            <button class="btn btn-primary btn-lg w-100">Zpět k soutěžícím</button>
+         </a>
+         </div>
+        </div>
+        <div class="accordion" id="accordionMiniatures">
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingOne">
+                <button class="accordion-button w-100" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                    <div class="row w-100">
+                        <div class="col-sm-4">Nový model</div>
+                        <div class="col-sm-2">---</div>
+                        <div class="col-sm-2">---</div>
+                        <div class="col-sm-2">---</div>
+                        <div class="col-sm-2"></div>
+                    </row>                    
+                </button>
+              </h2>
+              <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+                    
+                    <form id="formNew" class="form-inline" method="post">
+                        <fieldset>
+                        <div class="row align-items-end">
+                        {% csrf_token %}
+                        <input type="hidden" id="form_miniature_id" value="-1">
+                        <input type="hidden" id="form_person_id" value="{{person.id}}">
+                        {% for field in form1 %}
+                        {% if field.name == 'name' %}
+                        <div class="col-sm-4 align-items-bottom">
+                        {% else %}
+                        <div class="col-sm-2 align-items-bottom">
+                        {% endif %}
+                        <label class="control-label">{{ field.label }}
+                        {% if field.required %}
+                        *
+                        {% endif %}
+                        </label> 
+                        <div class="controls">{{ field }}</div> 
+                        </div>
+                        {% endfor %}
+                        <div class="col-sm-2 align-items">
+                        <div class="form-actions">
+                                <input type="hidden" name="form_button" value="{{person.id}}">
+                                <button id="form_button" type="submit" value="form_button" class="btn btn-primary w-100">Vytvořit</button>
+                        </div>
+                        </div>
+                        </fieldset>
+                    </form>
+                </div>
+              </div>
+            </div>
+            {% for miniature, form in miniature_list %}
+            <div class="accordion-item" id="accordionitem{{miniature.id}}">
+                <h2 class="accordion-header" id="heading{{miniature.id}}">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{miniature.id}}" aria-expanded="false" aria-controls="collapse{{miniature.id}}">
+                      <div class="row w-100">
+                          <div class="col-sm-4">{{miniature.name}}</div>
+                          <div class="col-sm-2">{{miniature.miniature_type}}</div>
+                          <div class="col-sm-2">{{miniature.scale}}</div>
+                          <div class="col-sm-2">{{miniature.manufacturer}}</div>
+                          <div class="col-sm-2">
+                          </div>
+                        </div>                    
+                  </button>
+                </h2>
+                <div id="collapse{{miniature.id}}" class="accordion-collapse collapse" aria-labelledby="heading{{miniature.id}}" data-bs-parent="#accordionExample">
+                  <div class="accordion-body">
+                      
+                      <form id="form{{miniature.id}}" class="form-inline" method="post" onsubmit="return {}">
+                          <fieldset>
+                          <div class="row align-items-end">
+                          {% csrf_token %}
+                          <input type="hidden" id="{{miniature.id}}_form_miniature_id" value="{{miniature.id}}">
+                          <input type="hidden" id="{{miniature.id}}_form_person_id" value="{{person.id}}">
+                          {% for field in form %}
+                          {% if field.name == 'name' %}
+                          <div class="col-sm-4 align-items-bottom">
+                          {% else %}
+                          <div class="col-sm-2 align-items-bottom">
+                          {% endif %}
+                          <label class="control-label">{{ field.label }}{% if field.field.required %} * {% endif %}
+                          </label> 
+                          <div class="controls">{{ field }}</div> 
+                          </div>
+                          {% endfor %}
+                          <div class="col-sm-2 align-items">
+                            <button id="delete_button" type="button" value="{{miniature.id}}" onclick="return delete_miniature({{miniature.id}})" class="btn btn-primary w-100" style="margin-top: 0.5em;">Smazat</button>
+                          <div class="form-actions">
+                                  <button type="submit" style="visibility: collapse;"></button>
+                                  <button id="form_button{{miniature.id}}" type="button" onclick="return edit_miniature(event, {{miniature.id}})" value="form_button" class="btn btn-primary w-100" style="margin-top: 0.5em;">Uložit</button>
+                          </div>
+                          </div>
+                          </fieldset>
+                      </form>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+    </div>
+</div>
+
+{% endblock %}

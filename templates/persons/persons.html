@@ -1,0 +1,311 @@
+{% extends 'base.html' %}
+
+{% block content %} 
+
+<script type="application/javascript">
+
+    function add_person(event)
+    {
+        event.preventDefault();
+        var formData = {
+            request: "add_person",
+            csrfmiddlewaretoken: "{{csrf_token}}",
+            owner: "{{user}}",
+            first_name: $("#id_first_name").val(),
+            last_name: $("#id_last_name").val(),
+            town: $("#id_town").val(),
+            address: $("#id_address").val(),
+            email: $("#id_email").val(),
+            phone: $("#id_phone").val(),
+            country: $("#id_country").val()
+        };
+
+        $.ajax({
+                type: "POST",
+                url: "{% url 'persons' %}",
+                data: formData,
+                dataType: "html",
+                encode: true,
+                success: function(data) {
+                    $("#card-deck").append(data)
+                },
+                error: function(jqHRX, error) {
+                    $("#person-form").replaceWith(jqHRX.responseText);
+                    console.log(error);
+                    console.log('Something went wrong');
+                }
+        });
+
+        return false;
+    }
+
+    function delete_person(event, person_id)
+    {
+        event.preventDefault();
+        if (!confirm('Opravdu si přejete smazat soutěžícího včetně jeho modelů?'))
+            return false;
+        
+        var formData = {
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            request: "delete_person",
+            person_id: person_id,
+        };
+
+        $.ajax({
+                person_id: person_id,
+                type: "POST",
+                url: "{% url 'persons' %}",
+                data: formData,
+                dataType: "json",
+                encode: true,
+
+                success: function(data) {
+                    $("#person-col-"+person_id).fadeOut(500);
+                    $("#person-col-"+person_id).remove();
+                },
+                error: function(error) {
+                    console.log(error);
+                    console.log('Something went wrong');
+                }
+        }).done(function(data) {
+
+        });
+
+        return true;
+    }
+
+    function edit_person(event, person_id)
+    {
+        event.preventDefault();
+
+        var formData = new FormData(document.getElementById('form'+person_id));
+        formData.append('request', 'edit_person');
+        formData.append('person_id', person_id);
+        formData.append('csrfmiddlewaretoken', '{{csrf_token}}');
+        
+        $.ajax({
+                type: "POST",
+                url: "{{request.path}}",
+                data: formData,
+                dataType: "json",
+                processData: false,
+                contentType: false,
+                encode: true,
+                success: function(data) {
+                    if (data['status'] == 'success')
+                    {
+                        $("#personDiv"+person_id).html(data['data']);
+                        $('#collapseForm'+person_id).collapse('hide');
+                        $('#collapsePerson'+person_id).collapse('show');
+                    }
+                    else if (data['status'] == 'invalid_form')
+                    {
+                        $("#formDiv"+person_id).html(data['form']);
+                    }
+                },
+                error: function(error) {
+                    console.log(error)
+                    console.log('Something went wrong');
+                }
+            }).done(function (data) {
+                console.log("delete done");
+            });
+
+            return false;
+    }
+
+</script>
+
+<div class="row row-cols-lg-5 g-4 mx-5 my-5" style="min-height: 38.5em;" id="card-deck">
+    <div class="col">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title">Nový soutěžící</h5>
+          <p class="card-text"></p>
+          <form class="form-horizontal" id="person-form" method="post" onsubmit="return add_person(event)">{% csrf_token %}
+            <fieldset>
+                <legend>{{ title }}</legend>
+                {% for field in form %}
+                    {% if field.errors %}
+                        <div class="control-group error">
+                            <label class="control-label">{{ field.label }}{% if field.field.required %} * {% endif %}</label>
+                            <div class="controls">{{ field }}
+                                <span class="help-inline">
+                                    <div class="alert alert-warning center-block alert-dismissible fade show" style="margin-top: 2vh;" role="alert">
+                                        {% for error in  field.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                </span>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="control-group">
+                            <label class="control-label">{{ field.label }}{% if field.field.required %} * {% endif %}</label>
+                            <div class="controls">{{ field }}
+                                {% if field.help_text %}
+                                    <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+                <div class="form-actions">
+                    <button type="submit"  class="btn btn-primary btn-lg btn-block w-100" style="margin-top: 2vh; align-self: flex-end;">Vytvořit profil soutěžícího</button>
+                </div>
+            </fieldset>
+          </form>
+        </div>
+
+      </div>
+    </div>
+    {% for person, count, form in persons %}
+    <div class="col" id="person-col-{{person.id}}">
+        <div class="card h-100">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">{{person.first_name}} {{person.last_name}}</h5>
+            <div class="collapse show" id="collapsePerson{{person.id}}">
+            <div id="personDiv{{person.id}}">
+            <p class="card-text">
+                <p style="text-align: left;">
+                    {% if user.is_superuser %}
+                    <p>
+                        Vlastník:
+                        <span style="float: right;">{{person.owner.get_username}}</span>
+                    </p>
+                    {% endif %}
+                    <p>
+                        Město:
+                        <span style="float: right;">{{person.town}}</span>
+                    </p>
+                    <p>
+                       Adresa:
+                       {% if person.address %}
+                       <span style="float: right;">{{person.address}}</span>
+                       {% endif %}
+                    </p>
+                    <p>
+                        Email:
+                        {% if person.email %}
+                        <span style="float: right;">{{person.email}}</span>
+                        {% endif %}
+                    </p>
+                    <p>
+                        Telefonní číslo:
+                        {% if person.phone %}
+                        <span style="float: right;">{{person.phone}}</span>
+                        {% endif %}
+                    </p>
+                    <p>
+                        Země:
+                        {% if person.country %}
+                        <span style="float: right;">{{person.country}}</span>
+                        {% endif %}
+                    </p>
+                    <p>
+                        Počet modelů:
+                        <span style="float: right;">{{count}}</span>
+                    </p>
+                </p>
+            </p>
+            </div>
+            <div class="mt-auto" style="margin-bottom: 1.2em;">
+                <button class="btn btn-primary btn-lg btn-block w-100" style="margin-top: 1em;" data-bs-toggle="collapse" onclick="$('#collapsePerson{{person.id}}').collapse('hide')" data-bs-target="#collapseForm{{person.id}}" aria-expanded="false" aria-controls="collapseForm{{person.id}} collapsePerson{{person.id}}">Upravit</button>
+                <form id="form-delete-{{person.id}}" class="form-horizontal" method="post" style="margin-top: 1em;" onsubmit="return delete_person(event, {{person.id}} )">
+                    <fieldset>
+                    <input type="hidden" value={{person.id}} name="delete_person_id" >
+                    <button type="submit" class="btn btn-primary btn-lg btn-block w-100">Smaž uživatele</button>
+                    </fieldset>
+                </form>
+                <a type="button" href="/persons/{{person.id}}" class="btn btn-primary btn-lg btn-block w-100" style="margin-top: 1em;">Modely</a>
+            </div>
+            </div>
+            <div class="collapse hide" id="collapseForm{{person.id}}">
+                <div id="formDiv{{person.id}}">
+                <form class="form-horizontal" method="post" id="form{{person.id}}" onsubmit="edit_person(event, {{person.id}})">{% csrf_token %}
+                    <fieldset>
+                        <legend>{{ title }}</legend>
+                        {% for field in form %}
+                            {% if field.errors %}
+                                <div class="control-group error">
+                                    <label class="control-label">{{ field.label }}{% if field.field.required %} * {% endif %}</label>
+                                    <div class="controls">{{ field }}
+                                        <span class="help-inline">
+                                            <div class="alert alert-warning center-block alert-dismissible fade show" style="margin-top: 2vh;" role="alert">
+                                                {% for error in  field.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        </span>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="control-group">
+                                    <label class="control-label">{{ field.label }}{% if field.field.required %} * {% endif %}</label>
+                                    <div class="controls">{{ field }}
+                                        {% if field.help_text %}
+                                            <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary btn-lg btn-block w-100" style="margin-top: 1em;">Uložit změny</button>
+                        </div>
+                    </fieldset>
+                  </form>
+                </div>
+                <button class="btn btn-primary btn-lg btn-block w-100" style="margin-top: 1em;" data-bs-toggle="collapse" onclick="$('#collapseForm{{person.id}}').collapse('hide')" data-bs-target="#collapsePerson{{person.id}}" aria-expanded="false" aria-controls="collapseForm{{person.id}} collapsePerson{{person.id}}">Zpět</button>
+            </div>
+          </div>
+        </div>
+    </div>
+    {% endfor %}
+  </div>
+
+{% endblock %}
+
+
+{% for form in forms %}
+<div class="col">
+  <div class="card h-100">
+    <div class="card-body">
+      <h5 class="card-title">{{form.person.first_name}} {{form.person.last_name}}</h5>
+      <form class="form-horizontal" method="post">{% csrf_token %}
+        <fieldset>
+            <legend>{{ title }}</legend>
+            {% for field in form %}
+                {% if field.errors %}
+                    <div class="control-group error">
+                        <label class="control-label">{{ field.label }}{% if field.field.required %} * {% endif %}</label>
+                        <div class="controls">{{ field }}
+                            <span class="help-inline">
+                                <div class="alert alert-warning center-block alert-dismissible fade show" style="margin-top: 2vh;" role="alert">
+                                    {% for error in  field.errors %}{{ error }}{% endfor %}
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="control-group">
+                        <label class="control-label">{{ field.label }}{% if field.field.required %} * {% endif %}</label>
+                        <div class="controls">{{ field }}
+                            {% if field.help_text %}
+                                <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-lg btn-block w-100" style="margin-top: 2vh; display: none;">Uložit změny</button>
+            </div>
+        </fieldset>
+      </form>
+      <form class="form-horizontal" method="get">
+          <fieldset>
+            <input type="hidden" value={{form.person.id}} name="person_id">
+            <button type="submit" class="btn btn-primary btn-lg btn-block w-100" style="margin-top: 2vh; align-self: flex-end;">Modely</button>
+          </fieldset>
+      </form>
+    </div>
+  </div>
+</div>
+{% endfor %}

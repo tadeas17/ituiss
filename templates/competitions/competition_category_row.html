@@ -1,0 +1,21 @@
+<tr id="row{{category.id}}">
+    <td>
+        <input type="text" name="name" class="form-control" maxlength="256" required=""
+               id="category_name_{{ category.id }}" value="{{ category.name }}">
+    </td>
+    <td>
+        {{category_count}}
+    </td>
+    <td>
+        <button onclick="UpdateCategoryName({{ category.id }})" type="submit"
+                class="btn btn-primary btn-lg btn-block">
+            Přejmenovat
+        </button>
+    </td>
+    <td>
+     <button onclick="removeCategory({{ category.id }})" type="submit"
+             class="btn btn-primary btn-lg btn-block">
+         Smazat
+     </button>
+ </td>
+</tr>

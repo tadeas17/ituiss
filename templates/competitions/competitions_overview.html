@@ -1,0 +1,282 @@
+{% extends 'base.html' %}
+
+{% block titleblock %}
+    <title>Modeláři - Přehled soutěží</title>
+{% endblock %}
+
+{% block content %}
+
+{% if user.is_superuser %}
+<div class="row justify-content-center gap-5" style="padding-top: 2em;">
+    <div class="d-grid col-sm-6 mx-auto">
+        <a href="/competition/create" class="btn btn-primary btn-lg btn-block" type="button" style="font: 2em sans-serif; hyphens: auto;">
+            Vytvořit soutěž
+        </a>
+    </div>
+    <hr>
+</div>
+{% endif %}
+
+
+
+    {% if user.is_superuser %}
+    <div class="row justify-content-center" style="padding-top: 4em;">
+        <div class="col-sm-10" style="padding-left: 2em;">
+            
+            <h3>Soutěže bez data konání</h3>
+        </div>
+    </div>
+    <div class="row row-cols-1 row-cols-lg-5 g-4 mx-5 my-5" id="card-deck">
+
+    {% for competition in dateless_competitions %}
+    <div class="col">
+        <div class="card h-100">
+            {% if competition.competition_logo %}
+            <div class="row justify-content-center align-items-center" style="height: 300px; padding-left: 1em; padding-right: 1em;">
+                <img class="card-img-top" src="{{competition.competition_logo.url}}" style="width: {{competition.competition_logo.width}}px;">
+            </div>
+                {% else %}
+                <div class="row" style="height: 300px;"></div>
+            {% endif %}            
+          <div class="card-body d-flex flex-column">
+
+            <a href="/competition/{{competition.id}}" class="btn btn-primary btn-lg btn-light" type="button" style="font: 2em sans-serif;">
+                {{competition.name}}
+            </a>
+            <p class="card-text">
+                {% if competition.visibly is False %}
+                
+                    <div class="alert alert-warning center-block alert-dismissible fade show" style="margin-top: 2vh;" role="alert">
+                        <div class="text-center">
+                        <h4>
+                            Nezveřejněné
+                        </h4>
+                    </div>
+
+                </div>
+                {% endif %}                
+                <p style="text-align: left;">
+
+                    {% if user.is_superuser %}
+                    <p>
+                        <h5>Vlastník</h5>
+                        {{competition.organizer}}
+                    </p>
+                    {% endif %}
+                    <p>
+                        <h5>Datum konání</h5>
+                        {% if competition.date_organisation %}
+                        {{competition.date_organisation}}
+                        {% endif %}
+                    </p>
+                    <p>
+                       <h5>Ukončení registrace</h5>
+                       {% if competition.date_registration %}
+                       {{competition.date_registration}}
+                       {% endif %}
+                    </p>
+                    <p>
+                        <h5>Pořadatel</h5> 
+                        {{competition.organizer.first_name}} {{competition.organizer.last_name}}
+                    </p>
+                </p>
+            </p>
+        </div>
+      </div>
+  </div>
+  {% endfor %}
+</div>
+<hr>
+   {% elif my_competitions %}
+   <div class="row justify-content-center" style="padding-top: 4em;">
+    <div class="col-sm-10" style="padding-left: 2em;">
+        
+        <h3>Moje soutěže</h3>
+    </div>
+</div>
+<div class="row row-cols-1 row-cols-lg-5 g-4 mx-5 my-5" id="card-deck">
+
+{% for competition in my_competitions %}
+<div class="col">
+    <div class="card h-100">
+        {% if competition.competition_logo %}
+        <div class="row justify-content-center align-items-center" style="height: 300px; padding-left: 1em; padding-right: 1em;">
+            <img class="card-img-top" src="{{competition.competition_logo.url}}" style="width: {{competition.competition_logo.width}}px;">
+        </div>
+            {% else %}
+            <div class="row" style="height: 300px;"></div>
+        {% endif %}            
+      <div class="card-body d-flex flex-column">
+
+        <a href="/competition/{{competition.id}}" class="btn btn-primary btn-lg btn-light" type="button" style="font: 2em sans-serif;">
+            {{competition.name}}
+        </a>
+        <p class="card-text">
+            {% if competition.visibly is False %}
+            
+                <div class="alert alert-warning center-block alert-dismissible fade show" style="margin-top: 2vh;" role="alert">
+                    <div class="text-center">
+                    <h4>
+                        Nezveřejněné
+                    </h4>
+                </div>
+
+            </div>
+            {% endif %}                
+            <p style="text-align: left;">
+
+                {% if user.is_superuser %}
+                <p>
+                    <h5>Vlastník</h5>
+                    {{competition.organizer}}
+                </p>
+                {% endif %}
+                <p>
+                    <h5>Datum konání</h5>
+                    {% if competition.date_organisation %}
+                    {{competition.date_organisation}}
+                    {% endif %}
+                </p>
+                <p>
+                   <h5>Ukončení registrace</h5>
+                   {% if competition.date_registration %}
+                   {{competition.date_registration}}
+                   {% endif %}
+                </p>
+                <p>
+                    <h5>Pořadatel</h5> 
+                    {{competition.organizer.first_name}} {{competition.organizer.last_name}}
+                </p>
+            </p>
+        </p>
+    </div>
+  </div>
+</div>
+{% endfor %}
+</div>
+<hr>
+  {% endif %}
+  <div class="row justify-content-center" style="padding-top: 4em;">
+    <div class="col-sm-10" style="padding-left: 2em;">
+        
+        <h3>Nadcházející soutěže</h3>
+    </div>
+</div>
+  <div class="row row-cols-1 row-cols-lg-5 g-4 mx-5 my-5" id="card-deck">
+    {% for competition in upcoming_competitions %}
+    <div class="col" id="person-col-{{person.id}}">
+        <div class="card h-100">
+            {% if competition.competition_logo %}
+            <div class="row justify-content-center align-items-center" style="height: 300px; padding-left: 1em; padding-right: 1em;">
+                <img class="card-img-top" src="{{competition.competition_logo.url}}" style="width: {{competition.competition_logo.width}}px;">
+            </div>
+                {% else %}
+                <div class="row" style="height: 300px;"></div>
+            {% endif %}            
+          <div class="card-body d-flex flex-column">
+
+            <a href="/competition/{{competition.id}}" class="btn btn-primary btn-lg btn-light" type="button" style="font: 2em sans-serif;">
+                {{competition.name}}
+            </a>
+            <p class="card-text">
+                {% if competition.visibly is False %}
+                
+                    <div class="alert alert-warning center-block alert-dismissible fade show" style="margin-top: 2vh;" role="alert">
+                        <div class="text-center">
+                        <h4>
+                            Nezveřejněné
+                        </h4>
+                    </div>
+
+                </div>
+                {% endif %}                
+                <p style="text-align: left;">
+
+                    {% if user.is_superuser %}
+                    <p>
+                        <h5>Vlastník</h5>
+                        {{competition.organizer}}
+                    </p>
+                    {% endif %}
+                    <p>
+                        <h5>Datum konání</h5>
+                        {{competition.date_organisation}}
+                    </p>
+                    <p>
+                       <h5>Ukončení registrace</h5>
+                       {{competition.date_registration}}
+                    </p>
+                    <p>
+                        <h5>Pořadatel</h5> 
+                        {{competition.organizer.first_name}} {{competition.organizer.last_name}}
+                    </p>
+                </p>
+            </p>
+        </div>
+      </div>
+  </div>
+  {% endfor %}
+</div>
+  <hr>
+<div class="row justify-content-center" style="padding-top: 4em;">
+    <div class="col-sm-10" style="padding-left: 2em;">
+        
+        <h3>Proběhlé soutěže</h3>
+    </div>
+</div>
+
+
+
+  <div class="row row-cols-1 row-cols-lg-5 g-4 mx-5 my-5" id="card-deck">
+  {% for competition in past_competitions %}
+  <div class="col" id="person-col-{{person.id}}">
+      <div class="card h-100">
+        <div class="card-body d-flex flex-column">
+            {% if competition.competition_logo %}
+            <div class="row justify-content-center align-items-center" style="height: 300px; padding-left: 1em; padding-right: 1em;">
+                <img class="card-img-top" src="{{competition.competition_logo.url}}" style="width: {{competition.competition_logo.width}}px;">
+            </div>
+                {% else %}
+                <div class="row" style="height: 300px;"></div>
+            {% endif %}            
+          <a href="/competition/{{competition.id}}" class="btn btn-primary btn-lg btn-light h-25" type="button" style="font: 2em sans-serif; hyphens: auto;">
+              {{competition.name}}
+          </a>
+          <p class="card-text">
+            {% if competition.visibly is False %}
+            <div class="alert alert-warning center-block alert-dismissible fade show" style="margin-top: 2vh;" role="alert">
+                <div class="text-center">
+                <h4>
+                    Nezveřejněné
+                </h4>
+                </div>
+            </div>
+            {% endif %}  
+              <p style="text-align: left;">
+                  {% if user.is_superuser %}
+                  <p>
+                      <h5>Vlastník</h5>
+                      {{competition.organizer}}
+                  </p>
+                  {% endif %}
+                  <p>
+                      <h5>Datum konání</h5>
+                      {{competition.date_organisation}}
+                  </p>
+                  <p>
+                     <h5>Ukončení registrace</h5>
+                     {{competition.date_registration}}
+                  </p>
+                  <p>
+                      <h5>Pořadatel</h5> 
+                      {{competition.organizer.first_name}} {{competition.organizer.last_name}}
+                  </p>
+              </p>
+          </p>
+      </div>
+    </div>
+</div>
+{% endfor %}
+</div>
+
+{% endblock %}

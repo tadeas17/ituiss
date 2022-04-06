@@ -1,0 +1,60 @@
+<div class="accordion-item" id="accordionitem{{miniature.id}}">
+    <h2 class="accordion-header" id="heading{{miniature.id}}">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{miniature.id}}" aria-expanded="false" aria-controls="collapse{{miniature.id}}">
+          <div class="row w-100">
+              <div class="col-sm-4">{{miniature.name}}</div>
+              <div class="col-sm-2">{{miniature.miniature_type}}</div>
+              <div class="col-sm-2">{{miniature.scale}}</div>
+              <div class="col-sm-2">{{miniature.manufacturer}}</div>
+              <div class="col-sm-2">
+                    {% if errors %}
+                    <span class="help-inline">
+                        <div class="alert alert-warning center-block alert-dismissible fade show" style="margin-top: 2vh;" role="alert">
+                            Změna selhala
+                        </div>
+                    </span>
+                    {% endif %}
+                </div>
+            </div>                    
+      </button>
+    </h2>
+    <div id="collapse{{miniature.id}}" class="accordion-collapse collapse" aria-labelledby="heading{{miniature.id}}" data-bs-parent="#accordionExample">
+      <div class="accordion-body">
+          
+          <form id="form{{miniature.id}}" class="form-inline" method="post" onsubmit="return {}">
+              <fieldset>
+              <div class="row align-items-end">
+              {% csrf_token %}
+              <input type="hidden" id="{{miniature.id}}_form_miniature_id" value="{{miniature.id}}" >
+              {% for field in form %}
+              {% if field.name == 'name' %}
+              <div class="col-sm-4 align-items-bottom">
+              {% else %}
+              <div class="col-sm-2 align-items-bottom">
+              {% endif %}
+              {% if field.errors %}
+                  <span class="help-inline">
+                      <div class="alert alert-warning center-block alert-dismissible fade show" style="margin-top: 2vh;" role="alert">
+                          {% for error in  field.errors %}{{ error }}{% endfor %}
+                      </div>
+                  </span>                    
+              <label class="control-label">{{ field.label }}{% if field.field.required %} * {% endif %}</label>
+              <div class="controls">{{ field }}</div>
+              {% else %}
+              <label class="control-label">{{ field.label }}{% if field.field.required %} * {% endif %}</label>
+              <div class="controls">{{ field }}</div>
+              {% endif %}
+              </div>
+              {% endfor %}
+              <div class="col-sm-2 align-items">
+                <button id="delete_button" type="button" value="{{miniature.id}}" onclick="return delete_miniature({{miniature.id}})" class="btn btn-primary w-100" style="margin-top: 0.5em;">Smazat</button>
+              <div class="form-actions">
+                <button type="submit" style="visibility: collapse;"></button>
+                      <button id="form_button"  type="button" onclick="return edit_miniature(event, {{miniature.id}})" class="btn btn-primary w-100" style="margin-top: 0.5em;">Uložit</button>
+              </div>
+              </div>
+              </fieldset>
+          </form>
+      </div>
+    </div>
+  </div>

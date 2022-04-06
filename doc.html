@@ -1,0 +1,189 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Projekt IIS</title>
+    <style type="text/css">
+    	table { border-collapse: collapse; }
+    	td, th { border: 1px solid black; padding: 0.3em 0.5em; text-align: left; }
+    	dt { font-weight: bold; margin-top: 0.5em; }
+    </style>
+</head>
+<body>
+
+<!-- Zkontrolujte prosím nastavení kódování v hlavičce dokumentu 
+     podle použitého editoru -->
+
+<h1>6. Vlastní zadání - Registrační systém pro modelářské soutěže</h1> <!-- Nahradte názvem svého zadání -->
+
+<dl>
+	<dt>Autoři</dt>
+	<dd>Dalibor Beneš <!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
+	    <a href="mailto:xbenes56@stud.fit.vutbr.cz">xbenes56@stud.fit.vutbr.cz</a> -
+		Návrh zadání, návrh schématu databáze, implementace základu uživatelského rozhraní,
+        implementace funkcionality ohledně uživatelů (přihlašování, registrace, odhlašování, změny),
+        implementace funkcionality ohledně tvorby a správy uživatelů a jejich
+        modelů, implementace přehledu soutěží a detailního pohledu na ně, zajištění cloud hostingu.
+	</dd>
+	<dd>Tadeáš Kot <!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
+	    <a href="mailto:xkotta00@stud.fit.vutbr.cz">xkotta00@stud.fit.vutbr.cz</a> -
+		Výběr použitých technologií, implementace vytváření a upravování soutěží, implementace
+        správy soutěžních kategorií.
+	</dd>
+  <dd>Otakar Sedlák <!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
+	    <a href="mailto:xsedla1r@stud.fit.vutbr.cz">xsedla1r@stud.fit.vutbr.cz</a> -
+		Dokumentace, testování uživatelského rozhraní.
+	</dd>
+	<dt>URL aplikace</dt>
+	<dd><a href="http://modelari.modelarskesouteze.com">modelari.modelarskesouteze.com</a></dd>
+</dl>
+
+<h2>Uživatelé systému pro testování</h2>
+<p>UŽIVATELÉ MUSÍ BÝT PODLE TÉTO TABULKY</p>
+<table>
+<tr><th>Login</th><th>Heslo</th><th>Role</th></tr>
+<tr><td>admin</td><td>admin</td><td>Administrátor</td></tr>
+<tr><td>uzivatel1</td><td>heslo111</td><td>Správce soutěží</td></tr>
+<tr><td>uzivatel2</td><td>heslo222</td><td>Správce osob</td></tr>
+<tr><td>registrovany1</td><td>heslo111</td><td>Registrovaný uživatel</td></tr>
+<tr><td>-</td><td>-</td><td>Neregistrovaný uživatel</td></tr>
+</table>
+
+<p><img src="use_cases.png"></p>
+
+<h2>Implementace</h2>
+<p>Stručná dokumentace k implementaci, která popisuje, které části projektu (např. PHP skripty) implementují jednotlivé případy použití.</p>
+
+<p>
+    Vybraný framwork Django je postaven okolo návrhového vzoru MTV, tedy Model, Template, View, který je zhruba analogický k MVC.
+    Model v obou vzorech zaujímá stejnou funkci, View v MTV obstarává business logiku, Template se stará o prezentační logiku.
+    Controller z MVC přesně neodpovídá View, protože funkcionalita Controlleru je z velké části integrována již v samotném frameworku. 
+</p>
+
+<p>
+    Framework Django zahrnuje i ORM, takže v celém projektu není ani jeden případ přímé manipulace s SQL dotazy.
+    ORM modely jsou vytvořené přesně podle předlohy v ER diagramu níže, nacházejí se v souboru modelari/models.py.
+</p>
+
+<p>
+    Jednotlivé View třídy představující View část návrhového vzoru jsou namapovány na svoje URL adresy, viz soubor modelari/urls.py
+</p>
+
+<p>
+    View třídy ve spolupráci s Template HTML soubory zaštitují veškerou business a prezentační logiku, takže jsou z hlediska
+    popisu implementace případů použití nejzajímavější. Všechny View třídy se nachází v souboru modelari/views.py. View třídy
+    zpracovávají HTTP požadavky a vykreslují zpět Template soubory, přesměrovávají uživatele na jinou stránku, nebo v případě
+    asynchronního dotazu (AJAX) vrací JSON objekty. Template soubory se využívají k vytváření HTML stránek, jedná se o HTML
+    soubory s přidanou notací frameworku Django pro View, která umožňuje vkládat data podle kontextu vytvořeném v příslušné View třídě.
+    K vykreslování formulářů se využívají Form třídy, které jsou součástí frameworku Django a umožňují jednoduché vytváření, následné
+    ověřování správnosti vložených dat a případného výpisu konkrétních chybových hlášek, v opačném případě k okamžitému zápisu dat do příslušného ORM modelu.
+    Tyto formulářové třídy se nachází v souboru modelari/forms.py
+</p>
+
+<p>
+    Frontend sestává z HTML Template souborů, které jsou doplněny o několik jednoduchých skriptů v jazyce JavaScript, nejčastěji
+    za účelem provádění asynchronních AJAX dotazů tam, kde to je vhodné. HTML kód stránek je doplněn frameworkem Bootstrap, který
+    poskytuje CSS kaskádové styly. Uživatelské rozhraní je ukotveno na souboru templates/base.html, který obsahuje záhlaví (navigační menu)
+    a zápatí každé stránky a jehož vnitří obsah je vyplněn Template souborem dle daného View.
+</p>
+
+<p>
+    Popis View a Template souborů a případy použití jež obsluhují:
+</p>
+<li>
+    <ul>
+        HomePageView třída a Template home_page.html:<br>
+        Vytváří úvodní stránku, která obsahuje pouze odkazy na další části registračního systému. Dostupnost odkazů se mění
+        podle uživatelské role.
+    </ul>
+    <ul>
+        PersonsView a soubory v templates/persons/, které začínají slovem "person":<br>
+        Vytváří přehled soutěžících, jež daný uživatel spravuje. V rámci přehledu lze vytvářet nové profily soutěžích
+        i upravovat již existující profily. Každý uživatel může spravovat neomezený počet soutěžích.
+        Každý soutěžící vlastní modely, jež se dají spravovat přes odkaz v kartě daného soutěžícího.
+    </ul>
+    <ul>
+        PersonMiniaturesView a soubory v templates/persons/, které začínají "miniature":<br>
+        Obsluhuje přehled modelů daného soutěžího, kde je možné modely vytvářet i upravovat již existující.
+    </ul>    
+    <ul>
+        CompetitionOverviewView a competitions/competitions_overview.html:<br>
+        Obsluhuje základní přehled modelů, který se zobrazuje různě podle role uživatele,
+        administrátor má možnost vytvářet nové soutěže, což je obstraráno přesměrováním na stránku
+        obsluhovanou CompetitionCreateView.
+    </ul>
+    <ul>
+        CompetitionDetailView, CompetitionRegistrationView, CompetitionPersonListView a CompetitionMiniatureCategoryView, 
+        s pomocí souborů z templates/competitions/ obsluhují detailní pohled na každou soutěž, správci či administrátorovi umožňují
+        editovat patametry soutěže, zobrazovat výpis registrací, spravovat soutěžní kategorie a všem registrovaným uživatelům
+        umožňují zaregistrovat na soutěž svoje soutěžící.
+    </ul>
+    <ul>
+        LoginPageView, LogouPageView, RegistrationPageView, AccountView a Template soubory v templates/accounts/:<br>
+        Obsluhují stránky, které mají co dočinění s základní uživatelsky orientovanou funkcionalitou, jako je přihlašování,
+        odhlašování, registrace a přehled a možné změny účtu.
+    </ul>
+    <ul>
+        UsersView, CategoriesView a soubory v templates/admin/:<br>
+        Obsluhují stránky přístupné pouze administrátorovi. UserView poskytuje přehled o aktivních a neaktivních uživatelích a
+        umožňuje upravovat jejich data. CategoriesView umožňuje administrátorovi zobrazovat, vytvářet a spravovat kategorie 
+        soutěží a modelů.
+    </ul>
+</li>
+
+
+<h3>Databáze</h3>
+
+<img src="ERD.png">
+
+<h2>Instalace</h2>
+
+Stručně popište: 
+<ul>
+    <li>
+        Je potřeba mít nainstalován python verze 3.8 a vytvořenou prázdnou postgres databázi.
+    </li>
+    <li>Po stažení a rozbalení projektu je potřeba vytvořit vyrtuální prostředí s pythonem 3.8, spustit jej a nainstalovat potřebné knihovny: <br>
+        mkdir venv <br/>
+        python3 -m venv ./ <br/>
+        source venv/bin/activate <br/>
+        pip install -r requirements.txt <br/>
+    </li>
+    <li>
+        Nyní svoji prázdnou databázi nastavíte v itu_iis/setting.py úpravou proměnnou DATABASES podle následujícího vzoru:<br/>
+        DATABASES = {<br/>
+    'default': {<br/>
+        'ENGINE': 'django.db.backends.postgresql',<br/>
+        'USER': 'Jméno uživatele',<br/>
+        'PASSWORD': 'Heslo uživatele',<br/>
+        'NAME': 'Název databáze',<br/>
+        'HOST': 'Hostitel',<br/>
+    }<br/>
+        <br/>
+        A spustíme inicializaci databáze: <br/>
+        ./dataInit.sh <br/>
+    </li>
+    <li>Nyní můžeme spustit server: <br/>
+    python manage.py runserver
+    </li>
+</ul>
+
+<h2>Známé problémy</h2>
+<p>
+    Problémem obecně byl nedostatek času v týmu.
+    Nejsou známy žádné konkrétní problémy, kód ale neprošel
+    důkladnou revizí a je proto velice možné, že u některé stránky
+    není korektně omezen přístup, pokud je zobrazena přímo odkazem.<br>
+
+    Dále je možné, že některé formuláře korektně nezobrazí chybné vstupy.
+    To se děje hlavně v případě formulárů s textovým vstupem, takže by zpravidla
+    chybný vstup ani neměl nastat.<br>
+
+    Známým problémem je nekonzistentní použití asynchronních AJAX dotazů,
+    to ovšem nemá na funkcionalitu projektu žádný vliv.
+</p>
+
+</body>
+</html>

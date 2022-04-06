@@ -1,0 +1,49 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>Bare - Start Bootstrap Template</title>
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="{% static 'startbootstrap-bare/assets/favicon.ico' %}" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="{% static 'startbootstrap-bare/css/styles.css' %}" rel="stylesheet" />
+        <link href="{% static 'navbar.html' %}" id='#navbar'/>
+        
+        <script src="//code.jquery.com/jquery.min.js"></script>
+        <script>
+            $(function(){
+            $("#navbar").load("{% static 'navbar.html' %}"); 
+            });
+        </script>
+    </head>
+    <body>
+        <link href="{% static 'navbar.html'%}" rel="import" />
+        
+        <!-- Import navigation bar -->
+        <div id="navbar"></div>
+        
+        <!-- Page content-->
+        <br>
+        <div class="container">
+            <div class="d-grid gap-2 col-6 mx-auto my-auto">
+                <button class="btn btn-primary btn-lg" type="button" style="background-color: gray;font: 1em sans-serif;" >Soutěže</button>
+                <button class="btn btn-primary btn-lg" type="button" style="background-color: gray; font: 1em sans-serif;">Button</button>
+            <!-- Experiment s tlačítky-->
+            <div class="text-center mt-5">
+                <h1>A Bootstrap 5 Starter Template</h1>
+                <p class="lead">A complete project boilerplate built with Bootstrap</p>
+                <p>Bootstrap v5.1.3</p>
+            </div>            
+            </div>
+        </div>
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="{% static 'startbootstrap-bare/js/scripts.js' %}"></script>
+    </body>
+</html>

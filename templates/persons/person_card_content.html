@@ -1,0 +1,42 @@
+<p class="card-text">
+    <p style="text-align: left;">
+        {% if user.is_superuser %}
+        <p>
+            Vlastník:
+            <span style="float: right;">{{person.owner.get_username}}</span>
+        </p>
+        {% endif %}
+        <p>
+            Město:
+            <span style="float: right;">{{person.town}}</span>
+        </p>
+        <p>
+           Adresa:
+           {% if person.address %}
+           <span style="float: right;">{{person.address}}</span>
+           {% endif %}
+        </p>
+        <p>
+            Email:
+            {% if person.email %}
+            <span style="float: right;">{{person.email}}</span>
+            {% endif %}
+        </p>
+        <p>
+            Telefonní číslo:
+            {% if person.phone %}
+            <span style="float: right;">{{person.phone}}</span>
+            {% endif %}
+        </p>
+        <p>
+            Země:
+            {% if person.country %}
+            <span style="float: right;">{{person.country}}</span>
+            {% endif %}
+        </p>
+        <p>
+            Počet modelů:
+            <span style="float: right;">{{count}}</span>
+        </p>
+    </p>
+</p>

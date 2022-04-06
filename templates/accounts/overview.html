@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block titleblock %}
+<title>Modeláři - Přehled účtu</title>
+{%endblock%}
+
+{% block content %}
+<div class="container-fluid flex-fill justify-content-center" style="margin-top: 2vh;">
+    {% if change_success %}
+    <div class="alert alert-success center-block alert-dismissible fade show" style="margin-top: 2vh;" role="alert">
+        {{change_success}}
+    </div>
+    {% endif %}
+    <div class="row h-50 justify-content-center align-items-center">
+        <div class="col col-lg-3">
+            <p class="lead">Přehled údajů</p>
+            <form action="" class="form-horizontal" method="post">{% csrf_token %}
+                <fieldset>
+                    <legend>{{ title }}</legend>
+                    {% for field in form1 %}
+                        {% if field.errors %}
+                            <div class="control-group error">
+                                <label class="control-label">{{ field.label }}{% if field.field.required %} * {% endif %}</label>
+                                <div class="controls">{{ field }}
+                                    <span class="help-inline">
+                                        <div class="alert alert-warning center-block alert-dismissible fade show" style="margin-top: 2vh;" role="alert">
+                                            {% for error in  field.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    </span>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="control-group">
+                                <label class="control-label">{{ field.label }}{% if field.field.required %} * {% endif %}</label>
+                                <div class="controls">{{ field }}
+                                    {% if field.help_text %}
+                                        <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                <div class="form-actions">
+                        <button type="submit" name="button1" class="btn btn-primary btn-lg btn-block" style="margin-top: 2vh;">Aktualizovat údaje</button>
+                </div>
+                </fieldset>
+            </form>
+            <hr>
+
+        <p class="lead">Změna hesla</p>
+        <form class="form-horizontal" method="post">{% csrf_token %}
+            <fieldset>
+                <legend>{{ title }}</legend>
+                {% for field in form2 %}
+                    {% if field.errors %}
+                        <div class="control-group error">
+                            <label class="control-label">{{ field.label }}{% if field.field.required %} * {% endif %}</label>
+                            <div class="controls">{{ field }}
+                                <span class="help-inline">
+                                    <div class="alert alert-warning center-block alert-dismissible fade show" style="margin-top: 2vh;" role="alert">
+                                        {% for error in  field.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                </span>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="control-group">
+                            <label class="control-label">{{ field.label }}{% if field.field.required %} * {% endif %}</label>
+                            <div class="controls">{{ field }}
+                                {% if field.help_text %}
+                                    <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            <div class="form-actions">
+                    <button type="submit" name="button2" class="btn btn-primary btn-lg btn-block" style="margin-top: 2vh;">Změnit heslo</button>
+            </div>
+            </fieldset>
+        </form>
+        {% if not user.is_superuser %}
+        <hr>
+        <p class="lead">Zrušení účtu</p>
+        <form class="form-horizontal" method="post">{% csrf_token %}
+            <fieldset>
+                <legend>{{ title }}</legend>
+                {% for field in form3 %}
+                    {% if field.errors %}
+                        <div class="control-group error">
+                            <label class="control-label">{{ field.label }}{% if field.field.required %} * {% endif %}</label>
+                            <div class="controls">{{ field }}
+                                <span class="help-inline">
+                                    <div class="alert alert-warning center-block alert-dismissible fade show" style="margin-top: 2vh;" role="alert">
+                                        {% for error in  field.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                </span>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="control-group">
+                            <label class="control-label">{{ field.label }}{% if field.field.required %} * {% endif %}</label>
+                            <div class="controls">{{ field }}
+                                {% if field.help_text %}
+                                    <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            <div class="form-actions">
+            <button type="submit" name="button3" class="btn btn-primary btn-lg btn-block" style="margin-top: 2vh;">Zrušit účet</button>
+            </div>
+            </fieldset>
+        </form>
+        {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

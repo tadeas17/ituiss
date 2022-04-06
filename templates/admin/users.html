@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block titleblock %}
+<title>Modeláři - Přehled uživatelů</title>
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center" style="margin-top: 3em;">
+<div class="col-md-8">
+    <div class="table-responsive">
+<table class="table">
+    <h3>Aktivní Uživatelé</h3>
+    <thead>
+      <tr>
+        <th scope="col">Uživatelské jméno</th>
+        <th scope="col">Křestní jméno</th>
+        <th scope="col">Příjmení</th>
+        <th scope="col">Email</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% for row_user in active_users %}
+            <tr>
+                <th scope="row">{{row_user.username}}</th>
+                <td>{{row_user.first_name}}</td>
+                <td>{{row_user.last_name}}</td>
+                <td>{{row_user.email}}</td>
+                <td>
+                    <form method="get">
+                        <input type="hidden" value={{row_user.get_username}} name="deactivate">
+                        <button type="submit" {% if user.is_superuser and user == row_user %} disabled {% endif %} class="btn btn-primary btn-sm">Deaktivovat</button>
+                    </form>
+                </td>
+                <td>
+                    <form method="get">
+                        <input type="hidden" value={{row_user.get_username}} name="edit">
+                        <button type="submit" {% if user.is_superuser and user == row_user %} disabled {% endif %} class="btn btn-primary btn-sm">Upravit</button>
+                    </form>
+                </td>
+              </tr>
+            {% endfor %}
+    </tbody>
+</table>
+</div>
+<hr>
+
+<div class="table-responsive">
+<table class="table">
+    <h3>Neaktivní uživatelé</h3>
+    <thead>
+      <tr>
+        <th scope="col">Uživatelské jméno</th>
+        <th scope="col">Křestní jméno</th>
+        <th scope="col">Příjmení</th>
+        <th scope="col">Email</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% for row_user in inactive_users %}
+        <tr>
+            <th scope="row">{{row_user.username}}</th>
+            <td>{{row_user.first_name}}</td>
+            <td>{{row_user.last_name}}</td>
+            <td>{{row_user.email}}</td>
+            <td>
+                <form method="get">
+                    <input type="hidden" value={{row_user.get_username}} name="activate">
+                    <button type="submit" class="btn btn-primary btn-sm">Aktivovat</button>
+                </form>
+            </td>
+            <td>
+                <form method="get">
+                    <input type="hidden" value={{row_user.get_username}} name="edit">
+                    <button type="submit" class="btn btn-primary btn-sm">Upravit</button>
+                </form>
+            </td>
+          </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+</div>
+</div>
+
+{% endblock %}

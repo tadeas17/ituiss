@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+
+{% block titleblock %}
+
+{% endblock %}
+
+{% block content %}
+
+    <script type="application/javascript">
+
+        function visibility_change()
+        {
+            var formData = {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                request: 'change_visibility',
+            };
+
+            $.ajax({
+                type: "POST",
+                url: "{{request.path}}",
+                data: formData,
+                dataType: "json",
+                encode: true,
+                success: function(data) {
+                    if (data['status'] == 'visible')
+                    {
+                        $("#visibility-button").text('Zneviditelnit');
+                    }
+                    else if (data['status'] == 'invisible')
+                    {
+                        $("#visibility-button").text('Zveřejnit');
+                    }
+                },
+                error: function(error) {
+                    console.log(error)
+                    console.log('Something went wrong');
+                }
+            }).done(function (data) {
+                console.log("visibility change done");
+            });
+        }
+
+        function set_datetime_locale()
+        {
+            jQuery.datetimepicker.setLocale('cs');
+            $(function () {
+                $("#id_date_organisation").datetimepicker();
+            });
+
+            $(function () {
+                $("#id_date_registration").datetimepicker();
+            });
+        }
+
+        function edit_competition(event)
+        {
+            event.preventDefault();
+
+            var formData = new FormData(document.getElementById('edit-form'));
+            formData.append('file', document.getElementById('id_competition_logo').files[0]);
+
+            $.ajax({
+                type: "POST",
+                url: "{{request.path}}",
+                data: formData,
+                dataType: "json",
+                processData: false,
+                contentType: false,
+                encode: true,
+                success: function(data) {
+                    if (data['status'] == 'success')
+                    {
+                        $("#form-status").collapse('show');
+                        $("#competition_logo").attr('src', data['competition_logo']);
+                        $("#type").text(data['type']);
+                        $("#description").html(data['description']);
+                        $("#registration_date").text(data['date_registration']);
+                        $("#organisation_date").text(data['date_organisation']);
+                        $("#organizer").text('');
+                        $("#organizer").html(data['organizer']);
+                    }
+                    else if (data['status'] == 'invalid_form')
+                    {
+                        $("#form-col").html(data['form']);
+                        set_datetime_locale();
+                    }
+                },
+                error: function(error) {
+                    $("#form-status").collapse('hide');
+                    console.log(error)
+                    console.log('Something went wrong');
+                }
+            }).done(function (data) {
+                console.log("delete done");
+            });
+
+            return false;
+        }
+    </script>
+
+    <div class="row justify-content-center" style="padding: 3em;">
+        <div class="col-sm-3" style="padding-inline: 1.5em;">
+            <div class="row sticky-top gap-2 align-items-start" style=" padding-top: 5em; z-index: 0; padding-bottom: 2em;">
+            {% if competition.organizer == user or user.is_superuser %}
+            {% if competition.visibly %}
+            <button id="visibility-button" class="btn btn-primary btn-block w-100" onclick="visibility_change()" >Zneviditelnit</button>
+            {% else %}
+            <button id="visibility-button" class="btn btn-primary btn-block w-100" onclick="visibility_change()">Zveřejnit</button>
+            {% endif %}
+            <a type="button" href="{{competition.id}}/categorys" class="btn btn-primary btn-block w-100">Správa kategorií</a>
+            <a type="button" href="{{competition.id}}/persons" class="btn btn-primary btn-block w-100">Soupiska soutěžících</a>
+
+            {% endif %}
+            <a type="button" href="{{competition.id}}/registration" class="btn btn-primary btn-block w-100">Přihlásit modely</a>
+            {% if user.is_superuser %}
+            <hr>
+            <form method="post" onsubmit="return confirm('Opravdu si přejete smazat soutěž?')">{% csrf_token %}
+                <input type="hidden" id="request" name="request" value="delete_competition">
+                <button type="submit" id='delete-button' class="btn btn-primary btn-block w-100">Smazat soutěž</button>
+            </form>
+            {% endif %}    
+        </div>
+        </div>
+        <div class="col-sm-6 border" style="padding: 1em;">
+            {% if competition.competition_logo %}
+            <div class="row align-items-center justify-content-center" style="height: 25em;">
+                <img class="card-img-top" id="competition_logo" src="{{competition.competition_logo.url}}" style="max-height: 100%; max-width: 100%; object-fit: contain;">
+            </div>
+            {% endif %}       
+            <h1 style="padding-top: 2em;">
+                 {{competition.name}}
+            </h1>
+            <br>
+            <div class="collapse multi-collapse" id="collapseForm">
+
+                    <link rel="stylesheet"
+                    href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css"
+                    integrity="sha256-DOS9W6NR+NFe1fUhEE0PGKY/fubbUCnOfTje2JMDw3Y=" crossorigin="anonymous"/>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js"
+                    integrity="sha256-FEqEelWI3WouFOo2VWP/uJfs1y8KJ++FLh2Lbqc8SJk=" crossorigin="anonymous"></script>
+                    <div class="container-fluid justify-content-center">
+                    <div class="row h-100 justify-content-center align-items-center" style="margin-top: 5vh;">
+
+                    <div class="col" id="form-col">
+                        <div class="collapse" id="form-status">
+                            <div class="alert alert-success center-block alert-dismissible fade show" style="margin-top: 2vh;" role="alert">
+                                Data úspěšně změněny.
+                            </div>
+                        </div>
+                        <form class="form-horizontal" id="edit-form"" onsubmit="return edit_competition(event)" method="post" enctype="multipart/form-data">{% csrf_token %}
+                            <fieldset>
+                                <legend>{{ title }}</legend>
+                                {% for field in form.visible_fields %}
+                                {% if field.name != 'organizer' or user.is_superuser %}
+                                    {% if field.errors %}
+                                        <div class="control-group error">
+                                            <label class="control-label">{{ field.label }}{% if field.field.required %} * {% endif %}</label>
+                                            <div class="controls">{{ field }}
+                                                <span class="help-inline">
+                                            <div class="alert alert-warning center-block alert-dismissible fade show"
+                                                style="margin-top: 2vh;" role="alert">
+                                                {% for error in  field.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        </span>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <div class="control-group">
+                                            <label class="control-label">{{ field.label }}{% if field.field.required %} * {% endif %}</label>
+                                            <div class="controls">{{ field }}
+                                                {% if field.help_text %}
+                                                    <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn btn-primary btn-lg btn-block"
+                                                style="margin-top: 2vh;">
+                                            Uložit úpravy
+                                        </button>
+                                    </div>
+                            </fieldset>
+                        </form>
+                        <script>
+                            jQuery.datetimepicker.setLocale('cs');
+                            $(function () {
+                                $("#id_date_organisation").datetimepicker();
+                            });
+                
+                            $(function () {
+                                $("#id_date_registration").datetimepicker();
+                            });
+                        </script>
+                    </div>
+
+                </div>
+
+            </div>
+
+            </div>
+            <div class="collapse show multi-collapse" id="collapseContent">
+                <h5>
+                    Druh soutěže:
+                </h5>
+                <p id="type">
+                    {{competition.type.name}}
+                </p>
+                <h5>
+                    Datum konání:
+                </h5>
+                <p id="organisation_date">
+                    {{competition.date_organisation}}
+                </p>
+                <h5>
+                    Datum ukončení registrací:
+                </h5>
+                <p id="registration_date">
+                    {{competition.date_registration}}
+                </p>
+                <h5>
+                    Pořadatel:
+                </h5>
+                <p id="organizer">
+                    {{competition.organizer.first_name}} {{competition.organizer.last_name}}, {{competition.organizer.email|urlize|escape }}
+                </p>
+                <hr>
+                <h3>
+                    Informace:
+                </h3>
+                <div id="description">
+                    {{ competition.description|linebreaks|urlize|escape }}
+                </div>
+            </div>
+            {% if competition.organizer == user or user.is_superuser %}
+            <hr>
+            <button class="btn btn-primary btn-block w-100" data-bs-toggle="collapse" onclick="$('#form-status').collapse('hide')" data-bs-target=".multi-collapse" aria-expanded="false" aria-controls="collapseForm collapseContent">Upravit</button>
+            {% endif %}
+        </div>
+
+    </div>
+{% endblock %}
+
+

@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+
+{% block titleblock %}
+<title>Modeláři - Kategorie</title>
+{% endblock %}
+
+{% block content %}
+
+<script type="application/javascript">
+
+    function delete_miniature_type(miniature_type_id)
+    {
+        if (!confirm("Opravdu si přejete smazat typ modelů?"))
+            return false;
+
+        var formData = {
+            csrfmiddlewaretoken: "{{csrf_token}}",
+            request:"delete_miniature_type",
+            miniature_type_id:miniature_type_id
+        };
+        $.ajax({
+            type: "POST",
+            url: "{% url 'categories' %}",
+            data: formData,
+            encode: true,
+            success: function(data) {
+                $("#miniature-row-"+miniature_type_id).remove();
+            },
+            error: function(error) {
+                console.log(error)
+                console.log('Something went wrong');
+            }
+        }).done(function (data) {
+            console.log("delete done");
+        });
+    }
+
+    function add_miniature_type(event)
+    {
+        event.preventDefault();
+        var formData = {
+            csrfmiddlewaretoken: "{{csrf_token}}",
+            request: "add_miniature_type",
+            miniature_type: $("#miniature_name").val()
+        };
+        $.ajax({
+            type: "POST",
+            url: "{% url 'categories' %}",
+            data: formData,
+            encode: true,
+            success: function(data) {
+                $("#miniature-table").append(data)
+            },
+            error: function(error) {
+                console.log(error)
+                console.log('Something went wrong');
+            }
+            }).done(function (data) {
+                console.log("miniature type added");
+            });
+    }
+
+    function delete_competition_type(competition_type_id)
+    {
+        if (!confirm("Opravdu si přejete smazat typ soutěží?"))
+            return false;
+
+        var formData = {
+            csrfmiddlewaretoken: "{{csrf_token}}",
+            request:"delete_competition_type",
+            competition_type_id:competition_type_id
+        };
+        $.ajax({
+            type: "POST",
+            url: "{% url 'categories' %}",
+            data: formData,
+            dataType: "json",
+            encode: true,
+            success: function(data) {
+                $("#competition-row-"+competition_type_id).remove();
+            },
+            error: function(error) {
+                console.log(error)
+                console.log('Something went wrong');
+            }
+            }).done(function (data) {
+                console.log("delete done");
+            });
+    }
+
+    function add_competition_type(event)
+    {
+        event.preventDefault();
+        var formData = {
+            csrfmiddlewaretoken: "{{csrf_token}}",
+            request: "add_competition_type",
+            competition_type: $("#competition_name").val()
+        };
+        $.ajax({
+            type: "POST",
+            url: "{% url 'categories' %}",
+            data: formData,
+            encode: true,
+            success: function(data) {
+                $("#competition-table").append(data)
+            },
+            error: function(error) {
+                console.log(error)
+                console.log('Something went wrong');
+            }
+            }).done(function (data) {
+                console.log("competition type added");
+            });
+    }
+
+</script>
+
+<div class="row justify-content-center w-100" style="margin-top: 5em; padding-left: 1em; padding-right: 1em;">
+    <div class="col-md-5">
+        <form id="form-miniature" class="form-inline" method="post" onsubmit="return add_miniature_type(event)">
+            <h4>Vytvořit nový typ modelu</h4>
+            <fieldset>
+            <div class="row align-items-end gap-3">
+            {% csrf_token %}
+            {% for field in miniature_type_form %}
+            {% if field.name == 'name' %}
+            <div class="col-sm-6 align-items-bottom">
+            {% else %}
+            <div class="col-sm-4 align-items-bottom">
+            {% endif %}
+            <label class="control-label">{{ field.label }}{% if field.field.required %} * {% endif %}</label>
+            <div class="controls">{{ field }}</div> 
+            </div>
+            {% endfor %}
+            <div class="col-sm-4 align-items">
+            <div class="form-actions">
+                    <button id="form_button" type="submit" value="form_button" class="btn btn-primary w-100">Vytvořit</button>
+            </div>
+            </div>
+            </fieldset>
+        </form>
+
+        <h4 style="margin-top: 2em;">Přehled existujících typů modelů</h4>
+        <table class="table" id="miniature-table">
+            <thead>
+              <tr>
+                <th scope="col">Typ modelu</th>
+                <th scope="col">Počet modelů daného typu</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for type, count in miniature_types %}
+            <tr id="miniature-row-{{type.id}}">
+                <td>{{type.name}}</td>
+                <td>{{count}}</td>
+                <td><button type="button" class="btn-close" onclick="return delete_miniature_type({{type.id}})" aria-label="Close"></button> </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+    </div>
+    <div class="col-md-5">
+        <form id="form-competition" class="form-inline" method="post" onsubmit="return add_competition_type(event)">
+            <h4>Vytvořit nový typ soutěže</h4>
+            <fieldset>
+            <div class="row align-items-end gap-3">
+            {% csrf_token %}
+            <input type="hidden" id="form_miniature_id" value="-1">
+            <input type="hidden" id="form_person_id" value="{{person.id}}">
+            {% for field in competition_type_form %}
+            {% if field.name == 'name' %}
+            <div class="col-sm-6 align-items-bottom">
+            {% else %}
+            <div class="col-sm-4 align-items-bottom">
+            {% endif %}
+            <label class="control-label">{{ field.label }}{% if field.field.required %} * {% endif %}</label>
+            <div class="controls">{{ field }}</div> 
+            </div>
+            {% endfor %}
+            <div class="col-sm-4 align-items">
+            <div class="form-actions">
+                    <input type="hidden" name="form_button" value="{{person.id}}">
+                    <button id="form_button" type="submit" value="form_button" class="btn btn-primary w-100">Vytvořit</button>
+            </div>
+            </div>
+            </fieldset>
+        </form>
+
+        <h4 style="margin-top: 2em;">Přehled existujících typů soutěží</h4>
+        <table class="table" id="competition-table">
+            <thead>
+              <tr>
+                <th scope="col">Typ soutěže</th>
+                <th scope="col">Počet soutěží daného typu</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for type, count in competition_types %}
+            <tr id="competition-row-{{type.id}}">
+                <td>{{type.name}}</td>
+                <td>{{count}}</td>
+                <td><button type="button" class="btn-close" onclick="return delete_competition_type({{type.id}})" aria-label="Close"></button></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+    </div>
+</div>
+
+{% endblock %}
+

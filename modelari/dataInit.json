@@ -1,0 +1,182 @@
+[
+    {
+      "model": "modelari.Person",
+      "pk": 1,
+      "fields": {
+        "first_name": "John",
+        "last_name": "Lennon",
+        "town": "Liverpool",
+        "address": "251 Menlove Avenue",
+        "country": "UK",
+        "email": "john@lennon.com",
+        "phone": "123456789",
+        "owner": "admin"                  
+      }
+    },
+    {
+        "model": "modelari.Person",
+        "pk": 2,
+        "fields": {
+          "first_name": "Vilem",
+          "last_name": "Podhorskij",
+          "town": "Jesenik",
+          "address": "Za Humny 42",
+          "country": "CZ",
+          "email": "vildabeast@seznam.cz",
+          "phone": "111222333",
+          "owner": "vilem"                  
+        }
+      },
+      {
+        "model": "modelari.Person",
+        "pk": 3,
+        "fields": {
+          "first_name": "Felix",
+          "last_name": "Fritzl",
+          "town": "Wien",
+          "address": "69 Brno Strasse",
+          "country": "AT",
+          "email": "fritzlfelix@gmail.com",
+          "phone": "444555666",
+          "owner": "felix"                  
+        }
+      },
+      {
+        "model": "modelari.Person",
+        "pk": 4,
+        "fields": {
+          "first_name": "Eduard",
+          "last_name": "Lakatos",
+          "town": "Kosice",
+          "address": "Lunik 9",
+          "country": "SK",
+          "email": "edamore@gmail.com",
+          "phone": "777888999",
+          "owner": "eduard"                  
+        }
+      },
+      {
+        "model": "modelari.Competition",
+        "pk": 5,
+        "fields": {
+          "name": "Brnenska liga 1. kolo",
+          "date_organisation": "2021-12-17 10:00:00",
+          "date_registration": "2021-12-5 23:59:59",
+          "type": "F1G",
+          "organizer": "felix",
+          "visibly": "True",
+          "description": "Soutez pro vsechny z Brna, kteri chteji predvest sve modely,.....",
+          "competition_logo": ""                  
+        }
+      },
+      {
+        "model": "modelari.Competition",
+        "pk": 6,
+        "fields": {
+          "name": "Prazsky pohar 2k22",
+          "date_organisation": "2022-03-15 09:30:00",
+          "date_registration": "2022-01-31 20:00:00",
+          "type": "P92",
+          "organizer": "felix",
+          "visibly": "False",
+          "description": "Jiz 30. rocnik tradicniho klani, kde se utkate s temi nejlepsimi,.....",
+          "competition_logo": ""                  
+        }
+      },
+      {
+        "model": "modelari.Miniature",
+        "pk": 7,
+        "fields": {
+            "miniature_type": "Letadlo",
+            "name": "CESSNA 182 SKYLANE",
+            "manufacturer": "Revell",
+            "scale": "1:32",
+            "owner": "eduard"
+        }
+      },
+      {
+        "model": "modelari.Miniature",
+        "pk": 8,
+        "fields": {
+            "miniature_type": "Letadlo",
+            "name": "Spitfire 00457",
+            "manufacturer": "Revell",
+            "scale": "1:72",
+            "owner": "eduard"
+        }
+      },
+      {
+        "model": "modelari.Miniature",
+        "pk": 9,
+        "fields": {
+            "miniature_type": "Ostatni",
+            "name": "Zetor Crystal 12045 4WD",
+            "manufacturer": "Formech",
+            "scale": "1:32",
+            "owner": "vilem"
+        }
+      },
+      {
+        "model": "modelari.ModelRegistration",
+        "pk": 10,
+        "fields": {
+            "time_of_registration": "2021-11-28 18:43:16",
+            "additional_information": "some random lorem ipsum",
+            "category": "Letadla",
+            "miniature": "Spitfire 00457",
+            "competition": "Brnenska liga 1. kolo"
+        }
+      },
+      {
+        "model": "modelari.MiniatureType",
+        "pk": 11,
+        "fields": {
+            "name": "Letadlo"
+        }
+      },
+      {
+        "model": "modelari.MiniatureType",
+        "pk": 12,
+        "fields": {
+            "name": "Ostatni"
+        }
+      },
+      {
+        "model": "modelari.CompetitionType",
+        "pk": 13,
+        "fields": {
+            "name": "F1G"
+        }
+      },
+      {
+        "model": "modelari.CompetitionType",
+        "pk": 14,
+        "fields": {
+            "name": "P92"
+        }
+      },
+      {
+        "model": "modelari.CompetitionMiniatureCategory",
+        "pk": 15,
+        "fields": {
+            "name": "Kategorie 10-15 let",
+            "competition": "Brnenska liga 1. kolo"
+        }
+      },
+      {
+        "model": "modelari.CompetitionMiniatureCategory",
+        "pk": 16,
+        "fields": {
+            "name": "Kategorie 15-18 let",
+            "competition": "Brnenska liga 1. kolo"
+        }
+      },
+      {
+        "model": "modelari.CompetitionMiniatureCategory",
+        "pk": 17,
+        "fields": {
+            "name": "Kategorie 18+",
+            "competition": "Brnenska liga 1. kolo"
+        }
+      }
+]
